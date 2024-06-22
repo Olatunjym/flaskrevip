@@ -35,11 +35,12 @@ jobs:
     - name: Configure gcloud
       run: gcloud config set project ${{ secrets.GCP_PROJECT_ID }}
 
-    - name: Install gke-gcloud-auth-plugin
+    - name: Install Google Cloud SDK and gke-gcloud-auth-plugin
       run: |
         curl -sSL https://sdk.cloud.google.com | bash
         exec -l $SHELL
         gcloud components install gke-gcloud-auth-plugin
+        echo "export PATH=$PATH:/root/google-cloud-sdk/bin" >> $GITHUB_ENV
 
     - name: Get GKE credentials
       run: gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER_NAME }} --zone ${{ secrets.GKE_CLUSTER_ZONE }}
