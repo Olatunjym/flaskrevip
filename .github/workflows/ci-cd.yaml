@@ -46,14 +46,10 @@ jobs:
       with:
         version: 'latest'
 
-    - name: Create Namespace if not exists
-      run: |
-        kubectl create namespace revip || true
-
     - name: Deploy to GKE using kubectl
       run: |
         kubectl apply -f Kubernetes/deployment.yaml -n revip
-        kubectl apply -f Kubernetes/service.yaml -n my-revip
+        kubectl apply -f Kubernetes/service.yaml -n revip
 
     - name: Complete job
       run: echo "Deployment completed successfully"
