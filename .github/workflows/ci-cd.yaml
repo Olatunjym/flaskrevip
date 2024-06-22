@@ -1,4 +1,4 @@
-name: Build and Deploy to GCP Kubernetes
+name: Build and Deploy to GCP Kubernetes #google cloud platform
 
 on:
   push:
@@ -28,7 +28,7 @@ jobs:
         docker push ${{ secrets.DOCKER_HUB_USERNAME }}/flask-ip-reverse-app:latest
 
     - name: Set up Google Cloud SDK
-      uses: google-github-actions/setup-gcloud@master
+      uses: google-github-actions/setup-gcloud@v1
       with:
         version: 'latest'
         project_id: ${{ secrets.GCP_PROJECT_ID }}
