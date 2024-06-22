@@ -1,4 +1,4 @@
-name: Build and Deploy to GCP Kubernetes
+name: Build and Deploy to GCP Kubernetes #gcp
 
 on:
   push:
