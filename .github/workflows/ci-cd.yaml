@@ -50,8 +50,6 @@ jobs:
       run: |
         kubectl apply -f Kubernetes/deployment.yaml -n revip
         kubectl apply -f Kubernetes/service.yaml -n revip
-        kubectl apply -f flask-ip-reverse-app/charts/templates/deployment.yaml -n revip
-        kubectl apply -f flask-ip-reverse-app/charts/templates/service.yaml -n revip
-
+       
     - name: Complete job
       run: echo "Deployment completed successfully"
