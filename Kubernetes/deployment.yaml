@@ -16,6 +16,7 @@ spec:
       containers:
       - name: flask-ip-reverse-app
         image: olatunjym/flask-ip-reverse-app:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 5000
 
