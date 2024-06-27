@@ -1,33 +1,29 @@
 from flask import Flask, request
-from flask_sqlalchemy import SQLAlchemy
+import os
+from pymongo import MongoClient
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ips.db'
-db = SQLAlchemy(app)
 
-class IP(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    original_ip = db.Column(db.String(50), nullable=False)
-    reversed_ip = db.Column(db.String(50), nullable=False)
-
-tables_created = False
-
-@app.before_request
-def create_tables():
-    global tables_created
-    if not tables_created:
-        db.create_all()
-        tables_created = True
+# MongoDB connection setup
+mongo_uri = os.getenv('MONGO_URI', 'mongodb://localhost:27017/')
+client = MongoClient(mongo_uri)
+db = client['ipdb']
+ip_collection = db['ips']
 
 @app.route('/')
-def reverse_ip():
-    client_ip = request.remote_addr
-    reversed_ip = '.'.join(client_ip.split('.')[::-1])
-    # Store the IPs in the database
-    new_ip = IP(original_ip=client_ip, reversed_ip=reversed_ip)
-    db.session.add(new_ip)
-    db.session.commit()
-    return f"Reversed IP: {reversed_ip}"
+def home():
+    # Obtain the original IP address from headers if behind a proxy
+    if 'X-Forwarded-For' in request.headers:
+        ip = request.headers['X-Forwarded-For'].split(',')[0]
+    else:
+        ip = request.remote_addr
+
+    reversed_ip = '.'.join(ip.split('.')[::-1])
+
+    # Store the reversed IP in the database
+    ip_collection.insert_one({'reversed_ip': reversed_ip})
+
+    return f"Your reversed IP is: {reversed_ip}"
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
