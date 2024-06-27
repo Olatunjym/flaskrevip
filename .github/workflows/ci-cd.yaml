@@ -32,10 +32,16 @@ jobs:
       uses: google-github-actions/setup-gcloud@v1
       with:
         version: 'latest'
-        service_account_key: ${{ secrets.GKE_SA_KEY }}
-        project_id: ${{ secrets.GKE_PROJECT }}
+        service_account_key: ${{ secrets.GCP_SA_KEY }}
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
 
+    - name: Authenticate Google Cloud
+      run: |
+        echo ${{ secrets.GCP_SA_KEY }} > ${HOME}/gcloud-key.json
+        gcloud auth activate-service-account --key-file=${HOME}/gcloud-key.json
+        gcloud config set project ${{ secrets.GCP_PROJECT_ID }}
+        
     - name: Deploy to GKE
       run: |
-        gcloud container clusters get-credentials reverseip --zone us-central1-a --project flaskreverseip
+        gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER_NAME }} --zone ${{ secrets.GKE_CLUSTER_ZONE }} --project ${{ secrets.GCP_PROJECT_ID }}
         kubectl apply -f k8s/
