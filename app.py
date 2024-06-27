@@ -12,6 +12,10 @@ ip_collection = db['ips']
 
 @app.route('/')
 def home():
+    # Log all headers for debugging
+    headers = request.headers
+    print(headers)
+
     # Obtain the original IP address from headers if behind a proxy
     if 'X-Forwarded-For' in request.headers:
         ip = request.headers['X-Forwarded-For'].split(',')[0]
