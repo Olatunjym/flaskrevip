@@ -51,5 +51,9 @@ jobs:
         kubectl apply -f Kubernetes/deployment.yaml -n revip
         kubectl apply -f Kubernetes/service.yaml -n revip
 
+    - name: Deploy Helm Chart to GKE
+      run: |
+        helm upgrade --install flask-ip-reverse-app charts -n revip
+
     - name: Complete job
       run: echo "Deployment completed successfully"
