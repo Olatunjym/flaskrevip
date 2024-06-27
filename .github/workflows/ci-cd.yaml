@@ -26,10 +26,10 @@ jobs:
       run: |
         docker build -t flask-ip-reverse-app .
         docker tag flask-ip-reverse-app your-dockerhub-username/flask-ip-reverse-app:latest
-        docker push olatunjym/flask-ip-reverse-app:latest
+        docker push your-dockerhub-username/flask-ip-reverse-app:latest
 
     - name: Set up Google Cloud SDK
-      uses: google-github-actions/setup-gcloud@master
+      uses: google-github-actions/setup-gcloud@v1
       with:
         version: 'latest'
         service_account_key: ${{ secrets.GKE_SA_KEY }}
@@ -37,5 +37,5 @@ jobs:
 
     - name: Deploy to GKE
       run: |
-        gcloud container clusters get-credentials reverseip --zone us-central1-a --project flaskreverseip 
+        gcloud container clusters get-credentials reverseip --zone us-central1-a --project flaskreverseip
         kubectl apply -f k8s/
