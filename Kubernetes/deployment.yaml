@@ -18,3 +18,9 @@ spec:
         image: olatunjym/flask-ip-reverse-app:latest
         ports:
         - containerPort: 5000
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: revip
