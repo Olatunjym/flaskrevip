@@ -1,4 +1,4 @@
-name: Deploy to AWS
+name: CI/CD Pipeline
 
 on:
   push:
@@ -6,46 +6,51 @@ on:
       - main
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
 
-    - name: Log in to Docker Hub
-      uses: docker/login-action@v1
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Install dependencies
+        run: pip install -r requirements.txt
 
-    - name: Build and push Docker image
-      run: |
-        docker build -t flask-ip-reverse-app .
-        docker tag flask-ip-reverse-app olatunjym/flask-ip-reverse-app:latest
-        docker push olatunjym/flask-ip-reverse-app:latest
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/flask-reverse-ip:latest .
+      
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ secrets.AWS_REGION }}
+      - name: Push Docker image
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/flask-reverse-ip:latest
 
-    - name: Install kubectl
-      run: |
-        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-        chmod +x kubectl
-        sudo mv kubectl /usr/local/bin/
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
 
-    - name: Update kubeconfig
-      run: |
-        aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ secrets.AWS_REGION }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Deploy to EKS
-      run: |
-        kubectl apply -f k8s/deployment.yaml -n revip
-        kubectl apply -f k8s/service.yaml -n revip
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Configure kubectl
+        run: gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER_NAME }} --region ${{ secrets.GKE_REGION }}
+
+      - name: Install Helm
+        uses: azure/setup-helm@v1
+
+      - name: Deploy Helm chart
+        run: |
+          helm upgrade --install flask-reverse-ip ./flask-reverse-ip --set image.repository=${{ secrets.DOCKER_USERNAME }}/flask-reverse-ip --set image.tag=latest

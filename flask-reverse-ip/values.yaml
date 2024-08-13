@@ -1,0 +1,11 @@
+image:
+  repository: olatunjym/flask-reverse-ip
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+service:
+  type: LoadBalancer
+  port: 80
+
+ingress:
+  enabled: false
