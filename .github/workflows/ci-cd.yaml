@@ -64,5 +64,5 @@ jobs:
         curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 
     - name: Deploy to GKE
-      run: |
-        helm upgrade --install flask-app ./helm/flask-app --set image.repository=${{ secrets.DOCKER_USERNAME }}/flask-app --set image.tag=latest
+  run: |
+    helm upgrade --install flask-app ./flask-app --set image.repository=${{ secrets.DOCKER_USERNAME }}/flask-app --set image.tag=latest
