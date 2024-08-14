@@ -65,4 +65,4 @@ jobs:
 
     - name: Deploy to GKE
       run: |
-        helm upgrade --install flask-reverse-ip ./helm/flask-reverse-ip --set image.repository=${{ secrets.DOCKER_USERNAME }}/flask-app --set image.tag=latest
+        helm upgrade --install flask-app ./helm/flask-app --set image.repository=${{ secrets.DOCKER_USERNAME }}/flask-app --set image.tag=latest
